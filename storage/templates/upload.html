@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block head %}
+  <style>
+    body {
+      font-family: "Ubuntu Mono", monospace;
+      font-size: 14px;
+    }
+
+    .upload {
+      margin-bottom: 20px;
+    }
+
+    .result {
+      display: none;
+    }
+
+    .result_url {
+      width: 200px;
+      background: #FFF;
+      border: 1px solid #DDD;
+      padding: 5px;
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <form class="upload" method="post" enctype="multipart/form-data">
+    <input class="upload_file" type="file" name="file">
+    {% csrf_token %}
+  </form>
+
+  <div class="result">
+    <div class="result_title">Direct link:</div>
+    <input class="result_url" type="text" readonly>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+  <script>
+    $(function() {
+      $('.upload').submit(function(e) {
+        e.preventDefault();
+        var data = new FormData(this);
+
+        $.ajax('/', {
+          data: data,
+          type: 'POST',
+          contentType: false,
+          processData: false,
+        }).then(res => {
+          $('.result').show();
+          $('.result_url').val(res.url).select();
+          document.execCommand('copy');
+        });
+      });
+
+      $('.upload_file').change(function() {
+        $('.upload').submit();
+        $(this).val('');
+      });
+
+      $('.result_url').click(function(e) {
+        e.preventDefault();
+        $(this).select();
+      });
+    });
+  </script>
+{% endblock %}

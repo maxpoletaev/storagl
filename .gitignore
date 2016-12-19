@@ -1,0 +1,16 @@
+uploads
+node_modules
+bower_components
+npm-debug.log
+__pycache__
+.DS_Store
+.coverage
+.venvrc
+.cache
+.idea
+.git
+*.bak
+*.pyc
+*.orig
+*.sqlite3
+*.db
