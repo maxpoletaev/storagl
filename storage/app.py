@@ -2,16 +2,17 @@ import os
 from django_micro import configure
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ALLOWED_HOSTS = ['localhost', 'static.zenwalker.me']
+ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOST') or 'localhost']
+USE_X_ACCEL = bool(os.environ.get('DJANGO_DEBUG', 0))
 DEBUG = bool(os.environ.get('DJANGO_DEBUG', 0))
 
-UPLOADS_DIR = os.path.join(BASE_DIR, 'uploads')
-UPLOADS_URL = '/uploads/'
+UPLOADS_DIR = os.path.join(BASE_DIR, 'data')
+UPLOADS_URL = '/data/'
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(UPLOADS_DIR, 'db.sqlite3'),
         'OPTIONS': {'check_same_thread': False},
     },
 }
@@ -119,13 +120,13 @@ def download(request, asset_slug):
     download = bool(request.GET.get('dl', False))
     asset.update_last_access()
 
-    if DEBUG:
-        response = FileResponse(asset.file,
-            content_type=asset.content_type)
-    else:
+    if USE_X_ACCEL:
         response = HttpResponse()
         response['X-Accel-Redirect'] = asset.file.url
         response['Content-Type'] = ''  # let nginx guess the mimetype
+    else:
+        response = FileResponse(asset.file,
+            content_type=asset.content_type)
 
     if asset.file_name:
         disposition = 'attachment' if download else 'inline'
