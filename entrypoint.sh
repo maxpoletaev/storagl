@@ -1,12 +1,14 @@
 #!/bin/sh
 
-manage() {
+gunicorn=/usr/local/bin/gunicorn
+
+manage_py() {
     python storage/app.py $@
 }
 
 run() {
-    manage migrate
-    /usr/local/bin/gunicorn storage.app --bind 0.0.0.0:8000
+    manage_py migrate
+    gunicorn storage.app --bind 0.0.0.0:8000
 }
 
 if [ "$1" = "" ]; then
