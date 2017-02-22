@@ -6,20 +6,20 @@
       font-family: "Ubuntu Mono", monospace;
       font-size: 14px;
     }
-
     .upload {
       margin-bottom: 20px;
     }
-
     .result {
       display: none;
     }
-
     .result_url {
       width: 200px;
       background: #FFF;
       border: 1px solid #DDD;
       padding: 5px;
+    }
+    .progress {
+      display: none;
     }
   </style>
 {% endblock %}
@@ -29,7 +29,10 @@
     <input class="upload_file" type="file" name="file">
     {% csrf_token %}
   </form>
-
+  <div class="progress">
+    <div class="progress_title">Uploading: <span class="progress_value"></span></div>
+    <progress class="progress_bar" max="100" value="0"></progress>
+  </div>
   <div class="result">
     <div class="result_title">Direct link:</div>
     <input class="result_url" type="text" readonly>
@@ -43,6 +46,8 @@
     $(function() {
       $('.upload').submit(function(e) {
         e.preventDefault();
+        $('.result').hide();
+        $('.progress').show();
         var data = new FormData(this);
 
         $.ajax('/', {
@@ -50,8 +55,14 @@
           type: 'POST',
           contentType: false,
           processData: false,
+          xhr() {
+            var xhr = $.ajaxSettings.xhr();
+            xhr.upload.addEventListener('progress', handleProgress, false);
+            return xhr;
+          }
         }).then(res => {
           $('.result').show();
+          $('.progress').hide();
           $('.result_url').val(res.url).select();
           document.execCommand('copy');
         });
@@ -66,6 +77,12 @@
         e.preventDefault();
         $(this).select();
       });
+
+      function handleProgress(progress) {
+        var percent = Math.round(100 / progress.total * progress.loaded, 2);
+        $('.progress_bar').attr('value', percent);
+        $('.progress_value').text(percent + '%');
+      }
     });
   </script>
 {% endblock %}
