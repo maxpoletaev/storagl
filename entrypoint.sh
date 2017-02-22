@@ -6,13 +6,13 @@ manage_py() {
     python storage/app.py $@
 }
 
-run() {
+start_gunicorn() {
     manage_py migrate
     gunicorn storage.app --bind 0.0.0.0:8000
 }
 
 if [ "$1" = "" ]; then
-    run
+    start_gunicorn
 else
-    manage $@
+    manage_py $@
 fi
