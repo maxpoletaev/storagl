@@ -48,7 +48,7 @@ class UploadStorage(FileSystemStorage):
 
 class Asset(models.Model):
     slug = models.SlugField(unique=True, default=short_uuid)
-    file = models.FileField(upload_to=ShardedUpload(), storage=UploadStorage())
+    file = models.FileField(upload_to=ShardedUpload(suffix_field='slug'), storage=UploadStorage())
     file_name = models.CharField(max_length=255, blank=True)
     content_type = models.CharField(max_length=100, blank=True)
     last_access = models.DateTimeField(blank=True, null=True)

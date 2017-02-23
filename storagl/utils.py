@@ -8,21 +8,27 @@ from django.utils.deconstruct import deconstructible
 
 @deconstructible
 class ShardedUpload:
-    def __init__(self, upload_path='', files_per_dir=1000):
-        self.upload_path = upload_path
+    def __init__(self, upload_path='', files_per_dir=1000, suffix_field=None):
         self.files_per_dir = files_per_dir
+        self.suffix_field = suffix_field
+        self.upload_path = upload_path
 
     def __call__(self, instance, filename):
         _, ext = os.path.splitext(filename)
+        suffix = self.get_suffix(instance)
         file_id = instance.pk or self.get_next_id(instance)
-        random_suffix = ''.join(random.choice(string.ascii_lowercase) for _ in range(4))
         dir_name = str(int(file_id / self.files_per_dir) * self.files_per_dir).rjust(len(str(self.files_per_dir)), '0')
-        filename = '{}_{}{}'.format(str(file_id).rjust(len(str(self.files_per_dir)), '0'), random_suffix, ext)
+        filename = '{}_{}{}'.format(str(file_id).rjust(len(str(self.files_per_dir)), '0'), suffix, ext)
         return os.path.join(self.upload_path, dir_name, filename)
 
     def __eq__(self, other):
         return self.upload_path == other.upload_path\
            and self.files_per_dir == other.files_per_dir  # noqa
+
+    def get_suffix(self, instance):
+        if self.suffix_field:
+            return getattr(instance, self.suffix_field)
+        return ''.join(random.choice(string.ascii_lowercase) for _ in range(4))
 
     def get_next_id(self, instance):
         try:
