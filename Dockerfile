@@ -1,8 +1,8 @@
 FROM python:3.5-alpine
+WORKDIR /app
 
-ADD storage /storage
-ADD entrypoint.sh requirements.txt /
-RUN pip install -r /requirements.txt
+ADD storagl entrypoint.sh requirements.txt ./
+RUN pip install -r requirements.txt
 
 EXPOSE 8000
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]

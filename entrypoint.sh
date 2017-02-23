@@ -3,7 +3,7 @@
 gunicorn=/usr/local/bin/gunicorn
 
 manage_py() {
-    python storage/app.py $@
+    python storagl/app.py $@
 }
 
 start_gunicorn() {

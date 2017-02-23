@@ -115,8 +115,8 @@ class UploadView(View):
 
 @route(r'^([\w\d\-]+)$', name='download')
 def download(request, asset_slug):
+    force_download = bool(request.GET.get('download', False))
     asset = get_object_or_404(Asset, slug=asset_slug)
-    download = bool(request.GET.get('dl', False))
     asset.update_last_access()
 
     if not DEBUG:
@@ -128,13 +128,13 @@ def download(request, asset_slug):
             content_type=asset.content_type)
 
     if asset.file_name:
-        disposition = 'attachment' if download else 'inline'
+        disposition = 'attachment' if force_download else 'inline'
         response['Content-Disposition'] = '{}; filename="{}"'.format(disposition, asset.file_name)
 
     return response
 
 
-@route(r'^([\w\d\-]+)\.json$', name='file_info')
+@route(r'^([\w\d\-]+)/meta/?$', name='file_info')
 def file_info(request, asset_slug):
     asset = get_object_or_404(Asset, slug=asset_slug)
     base_url = 'http://' + request.META['HTTP_HOST']
