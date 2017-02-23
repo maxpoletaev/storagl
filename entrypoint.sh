@@ -8,7 +8,7 @@ manage_py() {
 
 start_gunicorn() {
     manage_py migrate
-    gunicorn storage.app --bind 0.0.0.0:8000
+    gunicorn storagl.app --bind 0.0.0.0:8000
 }
 
 if [ "$1" = "" ]; then
