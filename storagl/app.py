@@ -151,7 +151,7 @@ class CleanupCommand(BaseCommand):
 
     def validate_options(self, options):
         if options['days'] < 1:
-            raise CommandError('Days option should be large that 0')
+            raise CommandError('Days option should be great that 0')
 
     def handle(self, *args, **options):
         self.validate_options(options)
