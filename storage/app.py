@@ -1,9 +1,8 @@
-import os
 from django_micro import configure
+import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOST') or 'localhost']
-USE_X_ACCEL = bool(os.environ.get('DJANGO_DEBUG', 0))
 DEBUG = bool(os.environ.get('DJANGO_DEBUG', 0))
 
 UPLOADS_DIR = os.path.join(BASE_DIR, 'data')
@@ -120,7 +119,7 @@ def download(request, asset_slug):
     download = bool(request.GET.get('dl', False))
     asset.update_last_access()
 
-    if USE_X_ACCEL:
+    if not DEBUG:
         response = HttpResponse()
         response['X-Accel-Redirect'] = asset.file.url
         response['Content-Type'] = ''  # let nginx guess the mimetype

@@ -47,6 +47,7 @@
       $('.upload').submit(function(e) {
         e.preventDefault();
         $('.result').hide();
+        $('.upload').hide();
         $('.progress').show();
         var data = new FormData(this);
 
@@ -62,6 +63,7 @@
           }
         }).then(res => {
           $('.result').show();
+          $('.upload').show();
           $('.progress').hide();
           $('.result_url').val(res.url).select();
           document.execCommand('copy');
