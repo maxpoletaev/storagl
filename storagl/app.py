@@ -18,7 +18,6 @@ DATABASES = {
 
 configure(locals())
 
-
 from collections import OrderedDict
 from datetime import timedelta
 
@@ -36,8 +35,7 @@ from django.views import View
 from django.db import models
 from django import forms
 
-from .utils import ShardedUpload, confirm, short_uuid
-from .tasks import run_async
+from .utils import ShardedUpload, confirm, short_uuid, run_in_executor
 
 
 @deconstructible
@@ -58,10 +56,10 @@ class Asset(models.Model):
         db_table = 'assets'
         app_label = get_app_label()
 
-    @run_async
+    @run_in_executor
     def update_last_access(self):
         self.last_access = timezone.now()
-        self.save()
+        self.save(update_fields=['last_access'])
 
     def as_json(self, base_url=''):
         upload_date = self.upload_date.isoformat()

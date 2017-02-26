@@ -1,9 +1,13 @@
+from concurrent.futures import ThreadPoolExecutor
+from functools import wraps
 import string
 import random
 import os
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.deconstruct import deconstructible
+
+executor = ThreadPoolExecutor(max_workers=1)
 
 
 @deconstructible
@@ -52,3 +56,10 @@ def short_uuid():
 
 def base_url(request, path):
     return 'http://{}{}'.format(request.META['HTTP_HOST'], path)
+
+
+def run_in_executor(func):
+    @wraps(func)
+    def decorator(*args, **kwargs):
+        return executor.submit(func, *args, **kwargs)
+    return decorator
