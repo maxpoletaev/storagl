@@ -27,6 +27,7 @@ from django.http import FileResponse, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.core.files.storage import FileSystemStorage
 from django.utils.deconstruct import deconstructible
+from django.views.decorators.cache import cache_page
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
@@ -112,6 +113,7 @@ class UploadView(View):
 
 
 @route(r'^([\w\d\-]+)$', name='download')
+@cache_page(60 * 60 * 24)  # 24 hours
 def download(request, asset_slug):
     force_download = bool(request.GET.get('download', False))
     asset = get_object_or_404(Asset, slug=asset_slug)
