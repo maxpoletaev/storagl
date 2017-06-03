@@ -24,10 +24,11 @@ from datetime import timedelta
 from django_micro import command, get_app_label, route, run
 from django.core.management.base import BaseCommand, CommandError
 from django.http import FileResponse, HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, render
 from django.core.files.storage import FileSystemStorage
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.deconstruct import deconstructible
-from django.views.decorators.cache import cache_page
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
@@ -93,6 +94,10 @@ class AssetForm(forms.ModelForm):
 
 @route(r'^$', name='upload')
 class UploadView(View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
     def get(self, request):
         return render(request, 'upload.html')
 
@@ -109,11 +114,17 @@ class UploadView(View):
         asset.file_name = file_name
         asset.save()
 
-        return redirect('file_info', asset.slug)
+        base_url = 'http://' + request.META['HTTP_HOST']
+        accept_content_type = request.META.get('HTTP_ACCEPT')
+
+        if 'application/json' in accept_content_type:
+            return JsonResponse(asset.as_json(base_url),
+                json_dumps_params={'ensure_ascii': False, 'indent': 2})
+
+        return HttpResponse(base_url + asset.get_absolute_url() + '\n')
 
 
-@route(r'^([\w\d\-]+)$', name='download')
-@cache_page(60 * 60 * 24)  # 24 hours
+@route(r'^([\w\-]+)$', name='download')
 def download(request, asset_slug):
     force_download = bool(request.GET.get('download', False))
     asset = get_object_or_404(Asset, slug=asset_slug)
@@ -134,7 +145,7 @@ def download(request, asset_slug):
     return response
 
 
-@route(r'^([\w\d\-]+)/meta/?$', name='file_info')
+@route(r'^([\w\-]+)/meta/?$', name='file_info')
 def file_info(request, asset_slug):
     asset = get_object_or_404(Asset, slug=asset_slug)
     base_url = 'http://' + request.META['HTTP_HOST']
@@ -160,6 +171,7 @@ class CleanupCommand(BaseCommand):
         assets = Asset.objects.filter(
             models.Q(last_access__lte=max_age) |
             models.Q(last_access=None, upload_date__lte=max_age))
+
         assets_count = assets.count()
 
         if not assets_count:
