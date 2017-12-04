@@ -117,11 +117,13 @@ class UploadView(View):
         base_url = 'http://' + request.META['HTTP_HOST']
         accept_content_type = request.META.get('HTTP_ACCEPT')
 
-        if 'application/json' in accept_content_type:
-            return JsonResponse(asset.as_json(base_url),
-                json_dumps_params={'ensure_ascii': False, 'indent': 2})
+        if 'application/json' not in accept_content_type:
+            return HttpResponse(base_url + asset.get_absolute_url() + '\n')
 
-        return HttpResponse(base_url + asset.get_absolute_url() + '\n')
+        return JsonResponse(
+            asset.as_json(base_url),
+            json_dumps_params={'ensure_ascii': False, 'indent': 2},
+        )
 
 
 @route('<slug:asset_slug>', name='download')
