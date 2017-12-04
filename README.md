@@ -7,7 +7,7 @@ Simple storage for screenshots and other shared files with short direct links.
 ## Quick Start
 
 ```bash
-docker run -d -p 8000:8000 -v $(pwd)/data:/app/data -e ALLOWED_HOST=localhost zenwalker/storagl
+docker run -d -p 8000:8000 -v $(pwd)/data:/app/data zenwalker/storagl
 ```
 
 ## Cleanup

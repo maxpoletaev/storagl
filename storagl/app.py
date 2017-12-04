@@ -2,8 +2,8 @@ from django_micro import configure
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOST') or 'localhost']
 DEBUG = bool(os.environ.get('DJANGO_DEBUG', 0))
+ALLOWED_HOSTS = ['*']
 
 UPLOADS_DIR = os.path.join(BASE_DIR, 'data')
 UPLOADS_URL = '/data/'
@@ -92,7 +92,7 @@ class AssetForm(forms.ModelForm):
         fields = ('file',)
 
 
-@route(r'^$', name='upload')
+@route('', name='upload')
 class UploadView(View):
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
@@ -124,7 +124,7 @@ class UploadView(View):
         return HttpResponse(base_url + asset.get_absolute_url() + '\n')
 
 
-@route(r'^([\w\-]+)$', name='download')
+@route('<slug:asset_slug>', name='download')
 def download(request, asset_slug):
     force_download = bool(request.GET.get('download', False))
     asset = get_object_or_404(Asset, slug=asset_slug)
@@ -145,7 +145,7 @@ def download(request, asset_slug):
     return response
 
 
-@route(r'^([\w\-]+)/meta/?$', name='file_info')
+@route('<slug:asset_slug>/meta/', name='file_info')
 def file_info(request, asset_slug):
     asset = get_object_or_404(Asset, slug=asset_slug)
     base_url = 'http://' + request.META['HTTP_HOST']
