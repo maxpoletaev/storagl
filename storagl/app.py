@@ -5,6 +5,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEBUG = bool(os.environ.get('DJANGO_DEBUG', 0))
 ALLOWED_HOSTS = ['*']
 
+FILE_OWNER = os.environ.get('FILE_OWNER')
 UPLOADS_DIR = os.path.join(BASE_DIR, 'data')
 UPLOADS_URL = '/data/'
 
@@ -113,6 +114,10 @@ class UploadView(View):
         asset.content_type = content_type
         asset.file_name = file_name
         asset.save()
+
+        if FILE_OWNER:
+            uid, gid = (int(x) for x in FILE_OWNER.split(':'))
+            os.chown(asset.file.path, uid, gid)
 
         base_url = 'http://' + request.META['HTTP_HOST']
         accept_content_type = request.META.get('HTTP_ACCEPT')
