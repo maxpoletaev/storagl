@@ -161,6 +161,19 @@ def file_info(request, asset_slug):
         json_dumps_params={'ensure_ascii': False, 'indent': 2})
 
 
+@command('remove_file')
+class RemoveFileCommand(BaseCommand):
+    def add_arguments(self, parser):
+        parser.add_argument('file_id', type=int)
+
+    def handle(self, file_id, *args, **options):
+        try:
+            asset = Asset.objects.get(id=file_id)
+        except Asset.DoesNotExist:
+            raise CommandError('File with id "{}" does not exist'.format(str(file_id)))
+        asset.delete()
+
+
 @command('cleanup')
 class CleanupCommand(BaseCommand):
     def add_arguments(self, parser):
