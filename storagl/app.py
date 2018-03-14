@@ -5,6 +5,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEBUG = bool(os.environ.get('DJANGO_DEBUG', 0))
 ALLOWED_HOSTS = ['*']
 
+FILE_UPLOAD_PERMISSIONS = 0o644
 FILE_OWNER = os.environ.get('FILE_OWNER')
 UPLOADS_DIR = os.path.join(BASE_DIR, 'data')
 UPLOADS_URL = '/data/'
