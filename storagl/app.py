@@ -1,5 +1,9 @@
-from django_micro import configure
 import os
+from collections import OrderedDict
+from datetime import timedelta
+
+from django_micro import configure
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEBUG = bool(os.environ.get('DJANGO_DEBUG', 0))
@@ -19,9 +23,6 @@ DATABASES = {
 }
 
 configure(locals())
-
-from collections import OrderedDict
-from datetime import timedelta
 
 from django_micro import command, get_app_label, route, run
 from django.core.management.base import BaseCommand, CommandError
